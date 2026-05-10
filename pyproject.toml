@@ -11,11 +11,8 @@ requires-python = ">=3.12"
 dependencies = [
     "polars>=1.0.0",
     "pyarrow>=15.0.0",
-    "quantilica-core",
+    "quantilica-core @ git+https://github.com/Quantilica/quantilica-core.git",
 ]
-
-[tool.uv.sources]
-quantilica-core = { path = "../quantilica-core", editable = true }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/quantilica_io"]
@@ -36,6 +33,9 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = ["-p", "no:cacheprovider"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [build-system]
 requires = ["hatchling"]
