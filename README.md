@@ -13,8 +13,17 @@
 
 ## 📦 Installation
 
+`quantilica-io` is published from this GitHub repository (not on PyPI). Add
+it to your project as a git dependency:
+
 ```bash
-uv add quantilica-io
+uv add "quantilica-io @ git+https://github.com/Quantilica/quantilica-io.git"
+```
+
+Or with pip:
+
+```bash
+pip install "quantilica-io @ git+https://github.com/Quantilica/quantilica-io.git"
 ```
 
 ## 🛠️ Usage
