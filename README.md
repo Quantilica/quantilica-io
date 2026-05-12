@@ -1,47 +1,68 @@
 # quantilica-io 📊
 
-**Analytical data processing and conversion layer for Quantilica.**
+**Camada de processamento e padronização analítica da Quantilica.**
 
-`quantilica-io` is the specialized layer for reading, validating, and converting raw data into analytical formats (Parquet).
+`quantilica-io` é a biblioteca especializada em leitura, validação e conversão de dados brutos para formatos analíticos de alto desempenho (Parquet), integrando-se nativamente com a infraestrutura de metadados do `quantilica-core`.
 
-## 🚀 Features
+## 🎯 Objetivo
 
-- **Multi-format Reader**: Unified interface for CSV, Excel, DBF, and JSON.
-- **Parquet Converter**: High-performance conversion using Polars and PyArrow.
-- **Data Contracts**: Schema validation and column standardization.
-- **Provenance Injection**: Embeds `quantilica-core` manifest metadata directly into Parquet headers.
+Desacoplar a lógica de processamento de dados (leitura, limpeza, conversão) do `quantilica-core`, mantendo o núcleo leve e focado exclusivamente em I/O (HTTP/FTP) e infraestrutura de metadados. Atua como uma ponte entre os arquivos brutos baixados pelos fetchers e os ativos analíticos prontos para consumo.
 
-## 📦 Installation
+## 🏗️ Arquitetura
 
-`quantilica-io` is published from this GitHub repository (not on PyPI). Add
-it to your project as a git dependency:
+O pacote utiliza as melhores ferramentas modernas para processamento de dados de alto desempenho:
+- **Polars**: Engine de processamento extremamente rápida escrita em Rust.
+- **PyArrow**: Suporte robusto para escrita Parquet e schemas complexos.
+- **quantilica-core**: Integração nativa com metadados de proveniência e sistemas de armazenamento.
+
+## 🛠️ Módulos
+
+### 1. `quantilica_io.reader`
+Abstração de leitura multi-formato integrada aos manifestos do core.
+- Suporte a: `CSV`, `JSON`, `Excel`, `DBF` (comum no DATASUS).
+- Integração com `quantilica_core.storage.LocalStorage`.
+- Detecção automática de encoding e delimitadores.
+
+### 2. `quantilica_io.schema`
+Definição de contratos de dados para garantir consistência entre datasets.
+- Classe `DataContract`: Define nomes de colunas padronizados, tipos e campos obrigatórios.
+- Validação preventiva: Erro imediato se a fonte oficial alterar o layout do arquivo.
+
+### 3. `quantilica_io.writer`
+Conversão padronizada para formatos analíticos.
+- `to_parquet()`: Escrita otimizada com compressão `zstd` e inclusão de metadados de proveniência (como o `sha256` original) no header do arquivo Parquet.
+- Particionamento inteligente baseado nos metadados do dataset.
+
+## ✅ Benefícios
+
+1. **Purismo nos Fetchers**: Um usuário que queira apenas baixar dados não precisa instalar dependências pesadas como Polars ou Arrow.
+2. **Reuso de Código**: Centraliza a lógica complexa de lidar com encoding `latin-1` ou separadores `;` comuns em portais de dados brasileiros.
+3. **Interoperabilidade**: Todos os arquivos gerados seguem padrões rígidos, permitindo consultas SQL (via DuckDB) em múltiplos datasets simultaneamente sem conflitos de tipo.
+
+## 📦 Instalação
+
+O `quantilica-io` é publicado via GitHub. Adicione-o ao seu projeto:
 
 ```bash
 uv add "quantilica-io @ git+https://github.com/Quantilica/quantilica-io.git"
 ```
 
-Or with pip:
-
-```bash
-pip install "quantilica-io @ git+https://github.com/Quantilica/quantilica-io.git"
-```
-
-## 🛠️ Usage
+## 🚀 Uso Rápido
 
 ```python
 from quantilica_io.writer import to_parquet
 from quantilica_core.manifests import DownloadManifest
 
-# Load a manifest from a download
+# Carrega um manifesto de um download realizado pelo core
 manifest = DownloadManifest.read_json("data/raw/dataset.csv.manifest.json")
 
-# Convert to Parquet with provenance
+# Converte para Parquet com rastreabilidade total (proveniência injetada no header)
 to_parquet(manifest, "data/processed/dataset.parquet")
 ```
 
 ---
 
-## ⚖️ License
+## ⚖️ Licença
 
 Copyright (c) 2026 Komesu, D.K. (Quantilica)  
-Licensed under the [MIT License](LICENSE).
+Licenciado sob a [MIT License](LICENSE).
