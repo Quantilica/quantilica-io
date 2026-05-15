@@ -15,7 +15,11 @@ class SmartReader:
     def __init__(self, default_encoding: str = "utf-8"):
         self.default_encoding = default_encoding
 
-    def read(self, path_or_manifest: str | Path | DownloadManifest, **kwargs: Any) -> pl.DataFrame:
+    def read(
+        self,
+        path_or_manifest: str | Path | DownloadManifest,
+        **kwargs: Any,
+    ) -> pl.DataFrame:
         """Read a file into a Polars DataFrame, optionally guided by a manifest."""
         if isinstance(path_or_manifest, DownloadManifest):
             path = Path(path_or_manifest.path)
@@ -25,7 +29,7 @@ class SmartReader:
         suffix = path.suffix.lower()
 
         if suffix == ".csv":
-            # Common case for Brazilian Gov data: use semicolon and latin-1 if not specified
+            # Brazilian Gov data: default to semicolon and latin-1
             if "separator" not in kwargs:
                 kwargs["separator"] = ";"
             if "encoding" not in kwargs:
@@ -43,7 +47,11 @@ class SmartReader:
 
         raise ValueError(f"Unsupported file format: {suffix}")
 
-    def scan(self, path_or_manifest: str | Path | DownloadManifest, **kwargs: Any) -> pl.LazyFrame:
+    def scan(
+        self,
+        path_or_manifest: str | Path | DownloadManifest,
+        **kwargs: Any,
+    ) -> pl.LazyFrame:
         """Lazily scan a file (optimized for large CSVs/Parquet)."""
         if isinstance(path_or_manifest, DownloadManifest):
             path = Path(path_or_manifest.path)

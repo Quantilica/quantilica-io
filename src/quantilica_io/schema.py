@@ -26,25 +26,30 @@ class DataContract:
 
     def validate(self, df: pl.DataFrame | pl.LazyFrame) -> None:
         """Validate a DataFrame against this contract."""
-        schema = df.collect_schema() if isinstance(df, pl.LazyFrame) else df.schema
-        
-        for field in self.fields:
-            if field.required and field.name not in schema:
-                raise ValueError(f"Missing required field: {field.name}")
-            
-            if field.name in schema:
-                actual_type = schema[field.name]
-                if actual_type != field.dtype:
-                    # Polars types can be complex, this is a basic check
+        schema = (
+            df.collect_schema()
+            if isinstance(df, pl.LazyFrame)
+            else df.schema
+        )
+
+        for field_spec in self.fields:
+            if field_spec.required and field_spec.name not in schema:
+                raise ValueError(f"Missing required field: {field_spec.name}")
+
+            if field_spec.name in schema:
+                actual_type = schema[field_spec.name]
+                if actual_type != field_spec.dtype:
                     raise TypeError(
-                        f"Field '{field.name}' has type {actual_type}, "
-                        f"expected {field.dtype}"
+                        f"Field '{field_spec.name}' has type "
+                        f"{actual_type}, expected {field_spec.dtype}"
                     )
 
     def cast(self, df: pl.DataFrame) -> pl.DataFrame:
         """Cast a DataFrame to match the contract types."""
         expressions = []
-        for field in self.fields:
-            if field.name in df.columns:
-                expressions.append(pl.col(field.name).cast(field.dtype))
+        for field_spec in self.fields:
+            if field_spec.name in df.columns:
+                expressions.append(
+                    pl.col(field_spec.name).cast(field_spec.dtype)
+                )
         return df.with_columns(expressions)

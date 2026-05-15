@@ -1,9 +1,9 @@
 import polars as pl
-import pytest
-from pathlib import Path
 from quantilica_core.manifests import DownloadManifest
-from quantilica_io.writer import to_parquet
+
 from quantilica_io.reader import SmartReader
+from quantilica_io.writer import to_parquet
+
 
 def test_to_parquet_with_manifest(tmp_path):
     # Create dummy data
@@ -25,11 +25,11 @@ def test_to_parquet_with_manifest(tmp_path):
     to_parquet(df, output_file, manifest=manifest)
     
     assert output_file.exists()
-    
-    # Verify metadata (requires pyarrow to read custom metadata easily or polars)
-    # Polars doesn't show custom metadata in a simple way yet, but we can verify the file is readable
+
+    # Verify metadata via Parquet read
     df_read = pl.read_parquet(output_file)
     assert df_read.equals(df)
+
 
 def test_smart_reader_csv(tmp_path):
     csv_file = tmp_path / "test.csv"
