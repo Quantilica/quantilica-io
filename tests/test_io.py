@@ -8,7 +8,7 @@ from quantilica_io.writer import to_parquet
 def test_to_parquet_with_manifest(tmp_path):
     # Create dummy data
     df = pl.DataFrame({"a": [1, 2, 3], "b": ["x", "y", "z"]})
-    
+
     # Create dummy manifest
     manifest = DownloadManifest(
         source_id="test-source",
@@ -18,12 +18,12 @@ def test_to_parquet_with_manifest(tmp_path):
         size_bytes=123,
         fetched_at="2026-05-09T00:00:00Z",
         path="test.csv",
-        producer="test-producer"
+        producer="test-producer",
     )
-    
+
     output_file = tmp_path / "test.parquet"
     to_parquet(df, output_file, manifest=manifest)
-    
+
     assert output_file.exists()
 
     # Verify metadata via Parquet read
@@ -34,10 +34,10 @@ def test_to_parquet_with_manifest(tmp_path):
 def test_smart_reader_csv(tmp_path):
     csv_file = tmp_path / "test.csv"
     csv_file.write_text("col1;col2\nval1;123", encoding="latin-1")
-    
+
     reader = SmartReader()
     df = reader.read(csv_file)
-    
+
     assert df.columns == ["col1", "col2"]
     assert df.height == 1
     assert df[0, "col2"] == 123

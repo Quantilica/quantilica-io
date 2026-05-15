@@ -35,10 +35,10 @@ class SmartReader:
             if "encoding" not in kwargs:
                 kwargs["encoding"] = "latin-1"
             return pl.read_csv(path, **kwargs)
-        
+
         if suffix == ".parquet":
             return pl.read_parquet(path, **kwargs)
-        
+
         if suffix == ".json":
             return pl.read_json(path, **kwargs)
 
@@ -66,7 +66,7 @@ class SmartReader:
             if "encoding" not in kwargs:
                 kwargs["encoding"] = "latin-1"
             return pl.scan_csv(path, **kwargs)
-        
+
         if suffix == ".parquet":
             return pl.scan_parquet(path, **kwargs)
 

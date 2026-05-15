@@ -18,13 +18,13 @@ def to_parquet(
     **kwargs: Any,
 ) -> Path:
     """Write a Polars DataFrame to Parquet with optional manifest metadata.
-    
-    The manifest's source information and hash are injected into the Parquet 
+
+    The manifest's source information and hash are injected into the Parquet
     file's metadata for end-to-end traceability.
     """
     output = Path(output_path)
     output.parent.mkdir(parents=True, exist_ok=True)
-    
+
     # Prepare metadata for injection
     metadata = {}
     if manifest:
@@ -34,21 +34,13 @@ def to_parquet(
         metadata["quantilica.origin_sha256"] = manifest.sha256
         metadata["quantilica.fetched_at"] = manifest.fetched_at
         metadata["quantilica.producer"] = manifest.producer
-        
+
     # Write to Parquet
     if isinstance(data, pl.LazyFrame):
         data.collect().write_parquet(
-            output, 
-            compression=compression, 
-            metadata=metadata,
-            **kwargs
+            output, compression=compression, metadata=metadata, **kwargs
         )
     else:
-        data.write_parquet(
-            output, 
-            compression=compression, 
-            metadata=metadata,
-            **kwargs
-        )
-        
+        data.write_parquet(output, compression=compression, metadata=metadata, **kwargs)
+
     return output
