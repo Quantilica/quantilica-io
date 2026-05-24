@@ -1,7 +1,7 @@
 import polars as pl
 from quantilica_core.manifests import DownloadManifest
 
-from quantilica_io.reader import SmartReader
+from quantilica_io.reader import SmartReader, read_brazilian_csv
 from quantilica_io.writer import to_parquet
 
 
@@ -41,3 +41,45 @@ def test_smart_reader_csv(tmp_path):
     assert df.columns == ["col1", "col2"]
     assert df.height == 1
     assert df[0, "col2"] == 123
+
+
+def test_read_brazilian_csv_polars_defaults(tmp_path):
+    csv_file = tmp_path / "br.csv"
+    csv_file.write_text(
+        "nome;valor\nfoo;1,5\nbar;-9999\n", encoding="latin-1"
+    )
+
+    df = read_brazilian_csv(csv_file)
+
+    assert df.columns == ["nome", "valor"]
+    assert df.height == 2
+    # comma decimal parsed as float; -9999 treated as null
+    assert df[0, "valor"] == 1.5
+    assert df[1, "valor"] is None
+
+
+def test_read_brazilian_csv_polars_kwargs_passthrough(tmp_path):
+    csv_file = tmp_path / "nohdr.csv"
+    csv_file.write_text("foo;10\nbar;20\n", encoding="latin-1")
+
+    df = read_brazilian_csv(
+        csv_file, has_header=False, new_columns=["k", "v"]
+    )
+
+    assert df.columns == ["k", "v"]
+    assert df.height == 2
+
+
+def test_read_brazilian_csv_pandas_engine(tmp_path):
+    import pytest
+
+    pd = pytest.importorskip("pandas")
+
+    csv_file = tmp_path / "br.csv"
+    csv_file.write_text("nome;valor\nfoo;1,5\n", encoding="latin-1")
+
+    df = read_brazilian_csv(csv_file, engine="pandas")
+
+    assert isinstance(df, pd.DataFrame)
+    assert list(df.columns) == ["nome", "valor"]
+    assert df.loc[0, "valor"] == 1.5
